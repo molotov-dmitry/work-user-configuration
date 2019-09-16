@@ -136,7 +136,13 @@ git config --global user.email "$LDAP_EMAIL"
 
 #### Configure pidgin ==========================================================
 
-if ! grep -F "<name>${LDAP_LOGIN}@chat.${LDAP_FQDN}/</name>" "$HOME/.purple/accounts.xml" >/dev/null 2>/dev/null
+grep -F "<name>${LDAP_LOGIN}@chat.${LDAP_FQDN}/</name>" "$HOME/.purple/accounts.xml" >/dev/null 2>/dev/null
+xmpp_status=$?
+
+grep -F "<protocol>prpl-bonjour</protocol>" "$HOME/.purple/accounts.xml" >/dev/null 2>/dev/null
+bonjour_status=$?
+
+if [[ $xmpp_status -ne 0 || $bonjour_status -ne 0 ]]
 then
     killall pidgin
 
