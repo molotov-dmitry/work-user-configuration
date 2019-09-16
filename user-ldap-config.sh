@@ -168,7 +168,7 @@ then
 </account>
 _EOF
 
-    nohup pidgin &
+    nohup pidgin >/dev/null 2>/dev/null &
 
 fi
 
