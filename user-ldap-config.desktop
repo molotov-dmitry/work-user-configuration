@@ -1,7 +1,10 @@
 [Desktop Entry]
 Version=1.0
 Name=User configuration
-Comment=Script for initializing users credentials using LDAP and GitLab 
+Comment=Script for initializing users credentials using LDAP and GitLab
+Icon=user 
 Exec=/usr/local/bin/user-ldap-config
 Terminal=true
 Type=Application
+AutostartCondition=unless-exists user-ldap-config/setup-done
+

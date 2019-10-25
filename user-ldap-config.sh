@@ -239,5 +239,6 @@ fi
 echo "Configuration completed. You can re-configure accounts by running 'user-ldap-config' command"
 read -p "Press [Enter] to continue"
 
-rm -f "${HOME}/.config/autostart/user-ldap-config.desktop"
+mkdir -p .config/user-ldap-config
+touch .config/user-ldap-config/setup-done
 
