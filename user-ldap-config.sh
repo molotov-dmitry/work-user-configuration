@@ -42,6 +42,15 @@ function addconfigline()
     [[ -n "$(tail -c1 "${file}")" ]] && echo >> "${file}"
 }
 
+function disabeautostart()
+{
+    echo "Configuration completed. You can re-configure accounts by running 'user-ldap-config' command"
+    read -p "Press [Enter] to continue"
+
+    mkdir -p .config/user-ldap-config
+    touch .config/user-ldap-config/setup-done
+}
+
 #### Input credentials =========================================================
 
 while true
@@ -50,6 +59,22 @@ do
 unset LDAP_LOGIN
 unset LDAP_PASSWORD
 unset LDAP_EMAIL
+
+while true
+do
+    read -p 'Configure account? [Y/n] ' NEED_CONFIGURE
+
+    if [[ -z "${NEED_CONFIGURE}" || "${NEED_CONFIGURE,,}" == 'y' ]]
+    then
+        break
+    fi
+
+    if [[ "${NEED_CONFIGURE,,}" == 'n' ]]
+    then
+        disabeautostart
+        exit 0
+    fi
+done
 
 while [[ -z "${LDAP_LOGIN}" ]]
 do
@@ -236,9 +261,5 @@ fi
 
 #### Remove autostart script ===================================================
 
-echo "Configuration completed. You can re-configure accounts by running 'user-ldap-config' command"
-read -p "Press [Enter] to continue"
-
-mkdir -p .config/user-ldap-config
-touch .config/user-ldap-config/setup-done
+disableautostart
 
