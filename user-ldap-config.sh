@@ -42,6 +42,18 @@ function addconfigline()
     [[ -n "$(tail -c1 "${file}")" ]] && echo >> "${file}"
 }
 
+function ispkginstalled()
+{
+    app="$1"
+
+    if dpkg -s "${app}" >/dev/null 2>&1
+    then
+        return 0
+    else
+        return 1
+    fi
+}
+
 function disableautostart()
 {
     echo "Configuration completed. You can re-configure accounts by running 'user-ldap-config' command"
@@ -142,6 +154,9 @@ fi
 
 #### Configure Git =============================================================
 
+if ispkginstalled git
+then
+
 #### Add credentials -----------------------------------------------------------
 
 if ! grep "https://${LDAP_LOGIN}:${LDAP_PASSWORD}@172.16.56.22" "$HOME/.git-credentials" >/dev/null 2>/dev/null
@@ -159,7 +174,14 @@ fi
 git config --global user.name  "$GITLAB_FULLNAME"
 git config --global user.email "$LDAP_EMAIL"
 
+#### ---------------------------------------------------------------------------
+
+fi
+
 #### Configure pidgin ==========================================================
+
+if ispkginstalled pidgin
+then
 
 grep -F "<name>${LDAP_LOGIN}@chat.${LDAP_FQDN}/</name>" "$HOME/.purple/accounts.xml" >/dev/null 2>/dev/null
 xmpp_status=$?
@@ -203,6 +225,8 @@ _EOF
 
 fi
 
+fi
+
 #### Change user name ==========================================================
 
 if [[ -n "$LDAP_GDM_NAME" ]]
@@ -226,6 +250,9 @@ then
 fi
 
 #### Create GOA accounts =======================================================
+
+if ispkginstalled gnome-online-accounts
+then
 
 #mkdir -p /home/dmitry/.config/goa-1.0
 
@@ -258,6 +285,8 @@ fi
 
 #_EOF
 #fi
+
+fi
 
 #### Remove autostart script ===================================================
 
