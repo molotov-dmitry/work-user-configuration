@@ -42,7 +42,7 @@ function addconfigline()
     [[ -n "$(tail -c1 "${file}")" ]] && echo >> "${file}"
 }
 
-function disabeautostart()
+function disableautostart()
 {
     echo "Configuration completed. You can re-configure accounts by running 'user-ldap-config' command"
     read -p "Press [Enter] to continue"
@@ -71,7 +71,7 @@ do
 
     if [[ "${NEED_CONFIGURE,,}" == 'n' ]]
     then
-        disabeautostart
+        disableautostart
         exit 0
     fi
 done
