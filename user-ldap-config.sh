@@ -327,8 +327,11 @@ _EOF
     mkdir -p "${HOME}/.local/share/kopete/avatars/User"
     cp -f "${HOME}/.face" "${HOME}/.local/share/kopete/avatars/User/${kopete_identity}.png"
     
-    #TODO: create password
-
+    wallet_id="$(qdbus org.kde.kwalletd5 /modules/kwalletd5 org.kde.KWallet.open kdewallet 0 "Kopete")"
+    
+    qdbus org.kde.kwalletd5 /modules/kwalletd5 createFolder     "${wallet_id}" "Kopete" "Kopete"
+    qdbus org.kde.kwalletd5 /modules/kwalletd5 writePassword    "${wallet_id}" "Kopete" "Account_JabberProtocol_${LDAP_LOGIN}@chat.${LDAP_FQDN}" "${LDAP_PASSWORD}" "Kopete"
+    
     nohup kopete >/dev/null 2>/dev/null &
 fi
 
