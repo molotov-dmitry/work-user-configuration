@@ -311,6 +311,9 @@ UseXOAuth2=false
 [IdentityManager]
 DefaultIdentity=${kopete_identity}
 
+[Behavior]
+initialStatus=Online
+
 [Identity_${kopete_identity}]
 Id=${kopete_identity}
 Label=${LDAP_GDM_NAME}
