@@ -152,6 +152,28 @@ then
 
 fi
 
+#### Change user name ==========================================================
+
+if [[ -n "$LDAP_GDM_NAME" ]]
+then
+    sudo usermod -c "$LDAP_GDM_NAME" "$USER"
+fi
+
+#### Update avatar =============================================================
+
+if [[ -n "${GITLAB_AVATAR}" ]]
+then
+
+    wget -qqq --no-check-certificate "${GITLAB_AVATAR}" -O "${HOME}/.face"
+
+    sudo mkdir -p '/var/lib/AccountsService/icons/'
+
+    sudo cp -f "${HOME}/.face" "/var/lib/AccountsService/icons/${USER}"
+
+    FUNC="$(declare -f addconfigline)"
+    sudo bash -c "$FUNC; addconfigline Icon \"/var/lib/AccountsService/icons/${USER}\" User \"/var/lib/AccountsService/users/${USER}\""
+fi
+
 #### Configure Git =============================================================
 
 if ispkginstalled git
@@ -192,8 +214,10 @@ bonjour_status=$?
 if [[ $xmpp_status -ne 0 || $bonjour_status -ne 0 ]]
 then
     killall pidgin
+    
+    mkdir -p "$HOME/.purple"
 
-    cat >"$HOME/.purple/accounts.xml" << _EOF
+    cat > "$HOME/.purple/accounts.xml" << _EOF
 <?xml version='1.0' encoding='UTF-8' ?>
 
 <account version='1.0'>
@@ -227,26 +251,85 @@ fi
 
 fi
 
-#### Change user name ==========================================================
+#### Configure kopete ==========================================================
 
-if [[ -n "$LDAP_GDM_NAME" ]]
-then
-    sudo usermod -c "$LDAP_GDM_NAME" "$USER"
-fi
-
-#### Update avatar =============================================================
-
-if [[ -n "${GITLAB_AVATAR}" ]]
+if ispkginstalled kopete
 then
 
-    wget -qqq --no-check-certificate "${GITLAB_AVATAR}" -O "${HOME}/.face"
+kopete_identity=$(echo "${LDAP_GDM_NAME}" | md5sum | cut -c 1-10)
 
-    sudo mkdir -p '/var/lib/AccountsService/icons/'
+grep -F "kopete_jabberEnabled=true" "$HOME/.config/kopeterc" >/dev/null 2>/dev/null
+xmpp_status=$?
 
-    sudo cp -f "${HOME}/.face" "/var/lib/AccountsService/icons/${USER}"
+grep -F "kopete_bonjourEnabled=true" "$HOME/.config/kopeterc" >/dev/null 2>/dev/null
+bonjour_status=$?
 
-    FUNC="$(declare -f addconfigline)"
-    sudo bash -c "$FUNC; addconfigline Icon \"/var/lib/AccountsService/icons/${USER}\" User \"/var/lib/AccountsService/users/${USER}\""
+if [[ $xmpp_status -ne 0 || $bonjour_status -ne 0 ]]
+then
+    killall kopete
+    
+    mkdir -p "$HOME/.config"
+    
+    cat > "$HOME/.config/kopeterc" << _EOF
+[Account_BonjourProtocol_${LDAP_GDM_NAME}]
+AccountId=${LDAP_GDM_NAME}
+ExcludeConnect=false
+Identity=${kopete_identity}
+Priority=1
+Protocol=BonjourProtocol
+emailAddress=${LDAP_EMAIL}
+firstName=${LDAP_FIRST_NAME}
+lastName=${LDAP_SURNAME}
+username=${LDAP_GDM_NAME}
+
+[Account_JabberProtocol_${LDAP_LOGIN}@chat.${LDAP_FQDN}]
+AccountId=${LDAP_LOGIN}@chat.${LDAP_FQDN}
+AllowPlainTextPassword=true
+CustomServer=false
+ExcludeConnect=false
+HideSystemInfo=false
+Identity=${kopete_identity}
+Libjingle=true
+MergeMessages=true
+OldEncrypted=false
+PasswordIsWrong=false
+Port=5222
+Priority=5
+Protocol=JabberProtocol
+ProxyJID=
+RememberPassword=true
+Resource=Kopete
+SendComposingEvent=true
+SendDeliveredEvent=true
+SendDisplayedEvent=true
+SendEvents=true
+SendGoneEvent=true
+Server=chat.${LDAP_FQDN}
+UseSSL=false
+UseXOAuth2=false
+
+[IdentityManager]
+DefaultIdentity=${kopete_identity}
+
+[Identity_${kopete_identity}]
+Id=${kopete_identity}
+Label=${LDAP_GDM_NAME}
+prop_QString_emailAddress=${LDAP_EMAIL}
+prop_QString_firstName=${LDAP_FIRST_NAME}
+prop_QString_lastName=${LDAP_SURNAME}
+prop_QString_photo=${HOME}/.local/share/kopete/avatars/User/${kopete_identity}.png
+
+[Plugins]
+kopete_bonjourEnabled=true
+kopete_jabberEnabled=true
+_EOF
+
+    mkdir -p "${HOME}/.local/share/kopete/avatars/User"
+    cp -f "${HOME}/.face" "${HOME}/.local/share/kopete/avatars/User/${kopete_identity}.png"
+    
+    #TODO: create password
+
+    nohup kopete >/dev/null 2>/dev/null &
 fi
 
 #### Create GOA accounts =======================================================
