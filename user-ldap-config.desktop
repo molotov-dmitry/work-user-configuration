@@ -7,4 +7,4 @@ Exec=/usr/local/bin/user-ldap-config
 Terminal=true
 Type=Application
 AutostartCondition=unless-exists user-ldap-config/setup-done
-
+X-KDE-autostart-condition=user-ldap-config/setup-done::autostart:true

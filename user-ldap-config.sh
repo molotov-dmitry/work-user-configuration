@@ -60,7 +60,7 @@ function disableautostart()
     read -p "Press [Enter] to continue"
 
     mkdir -p "${HOME}/.config/user-ldap-config"
-    touch "${HOME}/.config/user-ldap-config/setup-done"
+    echo "autostart=false" > "${HOME}/.config/user-ldap-config/setup-done"
 }
 
 #### Input credentials =========================================================
