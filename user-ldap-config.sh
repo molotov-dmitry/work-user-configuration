@@ -314,6 +314,13 @@ DefaultIdentity=${kopete_identity}
 [Behavior]
 initialStatus=Online
 
+[ContactList]
+contactListIconMode=IconPhoto
+showOfflineUsers=false
+
+[Notification Messages]
+KopeteTLSWarningchat.${LDAP_FQDN}InvalidCertSelfSigned=false
+
 [Identity_${kopete_identity}]
 Id=${kopete_identity}
 Label=${LDAP_GDM_NAME}
@@ -325,6 +332,11 @@ prop_QString_photo=${HOME}/.local/share/kopete/avatars/User/${kopete_identity}.p
 [Plugins]
 kopete_bonjourEnabled=true
 kopete_jabberEnabled=true
+
+[Status Manager]
+GlobalStatusCategory=2
+GlobalStatusMessage=
+GlobalStatusTitle=В сети
 _EOF
 
     mkdir -p "${HOME}/.local/share/kopete/avatars/User"
