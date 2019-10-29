@@ -59,8 +59,8 @@ function disableautostart()
     echo "Configuration completed. You can re-configure accounts by running 'user-ldap-config' command"
     read -p "Press [Enter] to continue"
 
-    mkdir -p .config/user-ldap-config
-    touch .config/user-ldap-config/setup-done
+    mkdir -p "${HOME}/.config/user-ldap-config"
+    touch "${HOME}/.config/user-ldap-config/setup-done"
 }
 
 #### Input credentials =========================================================
