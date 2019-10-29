@@ -350,11 +350,13 @@ _EOF
     nohup kopete >/dev/null 2>/dev/null &
 fi
 
+fi
+
 #### Create GOA accounts =======================================================
 
 if ispkginstalled gnome-online-accounts
 then
-
+    :
 #mkdir -p /home/dmitry/.config/goa-1.0
 
 #if ! grep "Provider=kerberos" "$HOME/.config/goa-1.0/accounts.conf" >/dev/null 2>/dev/null
