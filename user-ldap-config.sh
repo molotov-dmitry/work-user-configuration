@@ -226,6 +226,14 @@ git config --global user.email "$LDAP_EMAIL"
 
 fi
 
+#### Configure gitg ============================================================
+
+if ispkginstalled gitg && ispkginstalled libsecret-tools
+then
+  echo -n "${LDAP_PASSWORD}" | secret-tool store --label='RCZI GitLab' xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme https host "git.${LDAP_FQDN}"
+  echo -n "${LDAP_PASSWORD}" | secret-tool store --label='RCZI GitLab' xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme https host "172.16.56.22"
+fi
+
 #### Configure pidgin ==========================================================
 
 if ispkginstalled pidgin
