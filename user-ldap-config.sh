@@ -111,6 +111,9 @@ LDAP_SEARCHBASE=$(prefix_join_by ',' "${LDAP_DOMAIN[@]}")
 
 GITLAB_TOKEN='YnHhW11Lf9tvb_JB9zuM'
 
+XMPP_SERVER="chat.${LDAP_FQDN}"
+XMPP_EMAIL="${LDAP_LOGIN}@${XMPP_SERVER}"
+
 #### Check LDAP login is correct ===============================================
 
 ldapoutput="$(ldapsearch -o ldif-wrap=no -x -u -LLL -h "$LDAP_FQDN" -D "$LDAP_EMAIL" -w "$LDAP_PASSWORD" -b "$LDAP_SEARCHBASE" "(mail=$LDAP_EMAIL)" "cn")"
@@ -205,7 +208,7 @@ fi
 if ispkginstalled pidgin
 then
 
-grep -F "<name>${LDAP_LOGIN}@chat.${LDAP_FQDN}/</name>" "$HOME/.purple/accounts.xml" >/dev/null 2>/dev/null
+grep -F "<name>${XMPP_EMAIL}/</name>" "$HOME/.purple/accounts.xml" >/dev/null 2>/dev/null
 xmpp_status=$?
 
 grep -F "<protocol>prpl-bonjour</protocol>" "$HOME/.purple/accounts.xml" >/dev/null 2>/dev/null
@@ -223,7 +226,7 @@ then
 <account version='1.0'>
     <account>
         <protocol>prpl-jabber</protocol>
-        <name>${LDAP_LOGIN}@chat.${LDAP_FQDN}/</name>
+        <name>${XMPP_EMAIL}/</name>
         <password>${LDAP_PASSWORD}</password>
         <settings ui='gtk-gaim'>
             <setting name='auto-login' type='bool'>1</setting>
@@ -236,7 +239,7 @@ then
 			<setting name='email' type='string'>${LDAP_EMAIL}</setting>
 			<setting name='first' type='string'>${LDAP_FIRST_NAME}</setting>
 			<setting name='last' type='string'>${LDAP_SURNAME}</setting>
-			<setting name='jid' type='string'>${LDAP_LOGIN}@chat.${LDAP_FQDN}</setting>
+			<setting name='jid' type='string'>${XMPP_EMAIL}</setting>
 		</settings>
 		<settings ui='gtk-gaim'>
 			<setting name='auto-login' type='bool'>1</setting>
@@ -282,8 +285,8 @@ firstName=${LDAP_FIRST_NAME}
 lastName=${LDAP_SURNAME}
 username=${LDAP_GDM_NAME}
 
-[Account_JabberProtocol_${LDAP_LOGIN}@chat.${LDAP_FQDN}]
-AccountId=${LDAP_LOGIN}@chat.${LDAP_FQDN}
+[Account_JabberProtocol_${XMPP_EMAIL}]
+AccountId=${XMPP_EMAIL}
 AllowPlainTextPassword=true
 CustomServer=false
 ExcludeConnect=false
@@ -304,7 +307,7 @@ SendDeliveredEvent=true
 SendDisplayedEvent=true
 SendEvents=true
 SendGoneEvent=true
-Server=chat.${LDAP_FQDN}
+Server=${XMPP_SERVER}
 UseSSL=false
 UseXOAuth2=false
 
@@ -319,7 +322,7 @@ contactListIconMode=IconPhoto
 showOfflineUsers=false
 
 [Notification Messages]
-KopeteTLSWarningchat.${LDAP_FQDN}InvalidCertSelfSigned=false
+KopeteTLSWarning${XMPP_SERVER}InvalidCertSelfSigned=false
 
 [Identity_${kopete_identity}]
 Id=${kopete_identity}
@@ -345,7 +348,7 @@ _EOF
     wallet_id="$(qdbus org.kde.kwalletd5 /modules/kwalletd5 org.kde.KWallet.open kdewallet 0 "Kopete")"
     
     qdbus org.kde.kwalletd5 /modules/kwalletd5 createFolder     "${wallet_id}" "Kopete" "Kopete"
-    qdbus org.kde.kwalletd5 /modules/kwalletd5 writePassword    "${wallet_id}" "Kopete" "Account_JabberProtocol_${LDAP_LOGIN}@chat.${LDAP_FQDN}" "${LDAP_PASSWORD}" "Kopete"
+    qdbus org.kde.kwalletd5 /modules/kwalletd5 writePassword    "${wallet_id}" "Kopete" "Account_JabberProtocol_${XMPP_EMAIL}" "${LDAP_PASSWORD}" "Kopete"
     
     nohup kopete >/dev/null 2>/dev/null &
 fi
