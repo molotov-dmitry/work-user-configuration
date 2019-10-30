@@ -126,6 +126,9 @@ LDAP_SURNAME="$(echo "${LDAP_FULLNAME}" | awk '{print $1}')"
 LDAP_FIRST_NAME="$(echo "${LDAP_FULLNAME}" | awk '{print $2}')"
 LDAP_MIDDLE_NAME="$(echo "${LDAP_FULLNAME}" | awk '{print $3}')"
 
+LDAP_FIRST_NAME_LETTER="${LDAP_FIRST_NAME:0:1}"
+LDAP_SURNAME_LETTER="${LDAP_SURNAME:0:1}"
+
 if [[ -n "$LDAP_FULLNAME" ]]
 then
     break
@@ -167,7 +170,27 @@ fi
 if [[ -n "${GITLAB_AVATAR}" ]]
 then
 
+    #### Download avatar from GitLab -------------------------------------------
+
     wget -qqq --no-check-certificate "${GITLAB_AVATAR}" -O "${HOME}/.face"
+    
+    #### Generate avatar if not exists -----------------------------------------
+    
+    if [[ ! -s "${HOME}/.face" ]]
+    then
+    
+        bgcolor='#B71C1C'
+        fgfont="Arial"
+    
+    cat << _EOF | convert -density 1200 -resize 512x512 - "png:${HOME}/.face"
+<svg width="1000" height="1000">
+  <circle cx="500" cy="500" r="400" fill="${bgcolor}" />
+  <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="400px" font-family="${fgfont}" dy=".3em">${LDAP_FIRST_NAME_LETTER}${LDAP_SURNAME_LETTER}</text>
+</svg>
+_EOF
+    fi
+    
+    #### Configure account icon ------------------------------------------------
 
     sudo mkdir -p '/var/lib/AccountsService/icons/'
 
@@ -218,7 +241,17 @@ if [[ $xmpp_status -ne 0 || $bonjour_status -ne 0 ]]
 then
     killall pidgin
     
+    rm -rf "$HOME/.purple/icons"
+    
     mkdir -p "$HOME/.purple"
+    mkdir -p "$HOME/.purple/icons"
+    
+    xmppiconuuid="$(uuidgen | tr -d '-')"
+    bonjouriconuuid="$(uuidgen | tr -d '-')"
+    currentts="$(date +%s)"
+    
+    convert -resize 96x96 "${HOME}/.face" "$HOME/.purple/icons/${xmppiconuuid}.png"
+    cp -f                 "${HOME}/.face" "$HOME/.purple/icons/${bonjouriconuuid}.png"
 
     cat > "$HOME/.purple/accounts.xml" << _EOF
 <?xml version='1.0' encoding='UTF-8' ?>
@@ -231,6 +264,10 @@ then
         <settings ui='gtk-gaim'>
             <setting name='auto-login' type='bool'>1</setting>
         </settings>
+        <settings>
+			<setting name='buddy_icon' type='string'>${xmppiconuuid}.png</setting>
+			<setting name='buddy_icon_timestamp' type='int'>${currentts}</setting>
+		</settings>
     </account>
 	<account>
 		<protocol>prpl-bonjour</protocol>
@@ -240,6 +277,8 @@ then
 			<setting name='first' type='string'>${LDAP_FIRST_NAME}</setting>
 			<setting name='last' type='string'>${LDAP_SURNAME}</setting>
 			<setting name='jid' type='string'>${XMPP_EMAIL}</setting>
+			<setting name='buddy_icon' type='string'>${bonjouriconuuid}.png</setting>
+			<setting name='buddy_icon_timestamp' type='int'>${currentts}</setting>
 		</settings>
 		<settings ui='gtk-gaim'>
 			<setting name='auto-login' type='bool'>1</setting>
