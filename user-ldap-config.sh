@@ -7,9 +7,10 @@ cd "${ROOT_PATH}" || exit 1
 
 function join_by
 {
-    local IFS="$1"
+    local separator="$1"
     shift
-    echo "$*"
+    local result="$( printf "${separator}%s" "$@" )"
+    echo "${result:${#separator}}"
 }
 
 function prefix_join_by
