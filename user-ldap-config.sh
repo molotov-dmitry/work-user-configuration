@@ -115,6 +115,9 @@ GITLAB_TOKEN='YnHhW11Lf9tvb_JB9zuM'
 XMPP_SERVER="chat.${LDAP_FQDN}"
 XMPP_EMAIL="${LDAP_LOGIN}@${XMPP_SERVER}"
 
+GITLAB_SERVER="git.${LDAP_FQDN}"
+GITLAB_IP="172.16.56.22"
+
 #### Check LDAP login is correct ===============================================
 
 ldapoutput="$(ldapsearch -o ldif-wrap=no -x -u -LLL -h "$LDAP_FQDN" -D "$LDAP_EMAIL" -w "$LDAP_PASSWORD" -b "$LDAP_SEARCHBASE" "(mail=$LDAP_EMAIL)" "cn")"
@@ -231,8 +234,8 @@ fi
 
 if ispkginstalled gitg && ispkginstalled libsecret-tools
 then
-  echo -n "${LDAP_PASSWORD}" | secret-tool store --label='RCZI GitLab' xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme https host "git.${LDAP_FQDN}"
-  echo -n "${LDAP_PASSWORD}" | secret-tool store --label='RCZI GitLab' xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme https host "172.16.56.22"
+  echo -n "${LDAP_PASSWORD}" | secret-tool store --label="https://${GITLAB_SERVER}" xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme 'https' host "${GITLAB_SERVER}"
+  echo -n "${LDAP_PASSWORD}" | secret-tool store --label="https://${GITLAB_IP}"     xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme 'https' host "${GITLAB_IP}"
 fi
 
 #### Configure pidgin ==========================================================
