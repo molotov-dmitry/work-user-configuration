@@ -301,6 +301,19 @@ then
 </account>
 _EOF
 
+    #### Create autostart entry for pidgin -------------------------------------
+    
+    if [[ ! -e "${HOME}/.config/autostart/pidgin.desktop" ]]
+    then
+        for dir in "${HOME}/.local/share/applications" "/usr/share/applications"
+        do
+            if [[ -s "${dir}/pidgin.desktop" ]]
+            then
+                cp -f "${dir}/pidgin.desktop" "${HOME}/.config/autostart/pidgin.desktop"
+                break
+            fi
+        done
+    fi
 
     #### Start Pidgin ----------------------------------------------------------
 
