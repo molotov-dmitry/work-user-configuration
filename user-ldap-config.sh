@@ -243,20 +243,29 @@ fi
 if ispkginstalled pidgin
 then
 
+    #### Kill pidgin processes -------------------------------------------------
 
     killall pidgin
+    
+    #### Create Pidgin config directory ----------------------------------------
     
     rm -rf "$HOME/.purple/icons"
     
     mkdir -p "$HOME/.purple"
     mkdir -p "$HOME/.purple/icons"
     
+    #### Generate icon UUID and creation timestamp -----------------------------
+    
     xmppiconuuid="$(uuidgen | tr -d '-')"
     bonjouriconuuid="$(uuidgen | tr -d '-')"
     currentts="$(date +%s)"
     
+    #### Create account icons --------------------------------------------------
+    
     convert -resize 96x96 "${HOME}/.face" "$HOME/.purple/icons/${xmppiconuuid}.png"
     cp -f                 "${HOME}/.face" "$HOME/.purple/icons/${bonjouriconuuid}.png"
+    
+    #### Overwrite Pidgin config file ------------------------------------------
 
     cat > "$HOME/.purple/accounts.xml" << _EOF
 <?xml version='1.0' encoding='UTF-8' ?>
@@ -292,8 +301,10 @@ then
 </account>
 _EOF
 
-    nohup pidgin >/dev/null 2>/dev/null &
 
+    #### Start Pidgin ----------------------------------------------------------
+
+    nohup pidgin >/dev/null 2>/dev/null &
 
 fi
 
