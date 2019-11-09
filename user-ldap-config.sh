@@ -243,14 +243,7 @@ fi
 if ispkginstalled pidgin
 then
 
-grep -F "<name>${XMPP_EMAIL}/</name>" "$HOME/.purple/accounts.xml" >/dev/null 2>/dev/null
-xmpp_status=$?
 
-grep -F "<protocol>prpl-bonjour</protocol>" "$HOME/.purple/accounts.xml" >/dev/null 2>/dev/null
-bonjour_status=$?
-
-if [[ $xmpp_status -ne 0 || $bonjour_status -ne 0 ]]
-then
     killall pidgin
     
     rm -rf "$HOME/.purple/icons"
@@ -301,7 +294,6 @@ _EOF
 
     nohup pidgin >/dev/null 2>/dev/null &
 
-fi
 
 fi
 
