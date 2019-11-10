@@ -192,7 +192,7 @@ then
     cat << _EOF | convert -density 1200 -resize 512x512 - "png:${HOME}/.face"
 <svg width="1000" height="1000">
   <circle cx="500" cy="500" r="400" fill="${bgcolor}" />
-  <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="400px" font-family="${fgfont}" dy=".3em">${LDAP_FIRST_NAME_LETTER}${LDAP_SURNAME_LETTER}</text>
+  <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="500px" font-family="${fgfont}" dy=".3em">${LDAP_FIRST_NAME_LETTER}</text>
 </svg>
 _EOF
     fi
