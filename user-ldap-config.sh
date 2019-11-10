@@ -118,6 +118,9 @@ XMPP_EMAIL="${LDAP_LOGIN}@${XMPP_SERVER}"
 GITLAB_SERVER="git.${LDAP_FQDN}"
 GITLAB_IP="172.16.56.22"
 
+AVATAR_COLORS=('D32F2F' 'B71C1C' 'AD1457' 'EC407A' 'AB47BC' '6A1B9A' 'AA00FF' '5E35B1' '3F51B5' '1565C0' '0091EA' '00838F' '00897B' '388E3C' '558B2F' 'E65100' 'BF360C' '795548' '607D8B')
+AVATAR_COLORS_COUNT=${#AVATAR_COLORS[@]}
+
 #### Check LDAP login is correct ===============================================
 
 ldapoutput="$(ldapsearch -o ldif-wrap=no -x -u -LLL -h "$LDAP_FQDN" -D "$LDAP_EMAIL" -w "$LDAP_PASSWORD" -b "$LDAP_SEARCHBASE" "(mail=$LDAP_EMAIL)" "cn")"
@@ -180,10 +183,10 @@ then
     
     #### Generate avatar if not exists -----------------------------------------
     
-    if [[ ! -s "${HOME}/.face" ]]
+    if [[ ! -s "${HOME}/.face" ]] && which convert >/dev/null && which rsvg-convert >/dev/null
     then
-    
-        bgcolor='#B71C1C'
+        INDEX=$(( (RANDOM * RANDOM + RANDOM) % AVATAR_COLORS_COUNT ))
+        bgcolor="#${AVATAR_COLORS[$INDEX]}"
         fgfont="Arial"
     
     cat << _EOF | convert -density 1200 -resize 512x512 - "png:${HOME}/.face"
