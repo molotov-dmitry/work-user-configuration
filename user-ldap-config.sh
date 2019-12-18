@@ -185,14 +185,28 @@ then
     
     if [[ ! -s "${HOME}/.face" ]] && which convert >/dev/null && which rsvg-convert >/dev/null
     then
+        USER_NAME_LETTER="${LDAP_FIRST_NAME_LETTER}"
         INDEX=$(( (RANDOM * RANDOM + RANDOM) % AVATAR_COLORS_COUNT ))
         bgcolor="#${AVATAR_COLORS[$INDEX]}"
         fgfont="Arial"
+        
+        if [[ "gpqy" == *"${USER_NAME_LETTER}"* || "аруцд" == *"${USER_NAME_LETTER}"* ]]
+        then
+            dy=25
+        elif [[ "У"  == *"${USER_NAME_LETTER}"* ]]
+        then
+            dy=40
+        elif [[ "${USER_NAME_LETTER}" == "${USER_NAME_LETTER^^}" && "Д" != *"${USER_NAME_LETTER}"* ]]
+        then
+            dy=35
+        else
+            dy=30
+        fi
     
-    cat << _EOF | convert -density 1200 -resize 512x512 - "png:${HOME}/.face"
+        cat << _EOF | rsvg-convert -w 512 -h 512 -f png -o "${HOME}/.face"
 <svg width="1000" height="1000">
   <circle cx="500" cy="500" r="400" fill="${bgcolor}" />
-  <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="500px" font-family="${fgfont}" dy=".3em">${LDAP_FIRST_NAME_LETTER}</text>
+  <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="500px" dy="0.${dy}em" font-family="${fgfont}">${USER_NAME_LETTER}</text>
 </svg>
 _EOF
     fi
