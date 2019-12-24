@@ -439,6 +439,43 @@ fi
 
 fi
 
+#### Configure work report =====================================================
+
+if ispkginstalled work-report
+then
+
+unset reportconfig
+
+if [[ -f "${HOME}/.config/work-report/config.json" ]]
+then
+    reportconfig="$(jq '' "${HOME}/.config/work-report/config.json")"
+fi
+
+if [[ -z "$reportconfig" ]]
+then
+    reportconfig='{}'
+fi
+
+if [[ -n "${LDAP_FIRST_NAME}" ]]
+then
+    reportconfig="$(echo "${reportconfig}" | jq ".\"userFirstName\" = \"${LDAP_FIRST_NAME}\"")"
+fi
+
+if [[ -n "${LDAP_SURNAME}" ]]
+then
+    reportconfig="$(echo "${reportconfig}" | jq ".\"userSurname\" = \"${LDAP_SURNAME}\"")"
+fi
+
+if [[ -n "${LDAP_MIDDLE_NAME}" ]]
+then
+    reportconfig="$(echo "${reportconfig}" | jq ".\"userLastName\" = \"${LDAP_MIDDLE_NAME}\"")"
+fi
+
+mkdir -p "${HOME}/.config/work-report"
+echo "${reportconfig}" > "${HOME}/.config/work-report/config.json"
+
+fi
+
 #### Create GOA accounts =======================================================
 
 if ispkginstalled gnome-online-accounts
