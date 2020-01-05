@@ -255,6 +255,34 @@ then
     echo -n "${LDAP_PASSWORD}" | secret-tool store --label="https://${GITLAB_IP}"     xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme 'https' host "${GITLAB_IP}"
 fi
 
+#### Configure Epiphany ========================================================
+
+if ispkginstalled epiphany-browser
+then
+    #### GitLab ----------------------------------------------------------------
+    
+    echo -n "${LDAP_PASSWORD}" | secret-tool store \
+        --label="Пароль для ${LDAP_LOGIN} в форме в https://${GITLAB_SERVER}" \
+        xdg:schema org.epiphany.FormPassword \
+        server_time_modified 0 \
+        id "{$(uuidgen)}" \
+        form_password 'password' \
+        target_origin "https://${GITLAB_SERVER}" \
+        username "${LDAP_LOGIN}" \
+        uri "https://${GITLAB_SERVER}" \
+        form_username 'username'
+        
+    # TODO: IP-address
+    
+    #### Outlook ---------------------------------------------------------------
+    
+    # TODO: subj
+    
+    #### Redmine ---------------------------------------------------------------
+    
+    # TODO: subj
+fi
+
 #### Configure pidgin ==========================================================
 
 if ispkginstalled pidgin
