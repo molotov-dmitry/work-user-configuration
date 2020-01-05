@@ -251,8 +251,8 @@ fi
 
 if ispkginstalled gitg && ispkginstalled libsecret-tools
 then
-  echo -n "${LDAP_PASSWORD}" | secret-tool store --label="https://${GITLAB_SERVER}" xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme 'https' host "${GITLAB_SERVER}"
-  echo -n "${LDAP_PASSWORD}" | secret-tool store --label="https://${GITLAB_IP}"     xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme 'https' host "${GITLAB_IP}"
+    echo -n "${LDAP_PASSWORD}" | secret-tool store --label="https://${GITLAB_SERVER}" xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme 'https' host "${GITLAB_SERVER}"
+    echo -n "${LDAP_PASSWORD}" | secret-tool store --label="https://${GITLAB_IP}"     xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme 'https' host "${GITLAB_IP}"
 fi
 
 #### Configure pidgin ==========================================================
