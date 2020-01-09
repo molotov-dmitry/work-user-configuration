@@ -118,6 +118,10 @@ XMPP_EMAIL="${LDAP_LOGIN}@${XMPP_SERVER}"
 GITLAB_SERVER="git.${LDAP_FQDN}"
 GITLAB_IP="172.16.56.22"
 
+REDMINE_SERVER="redmine.rczifort.local"
+
+EXCHANGE_SERVER="ex01.rczifort.local"
+
 AVATAR_COLORS=('D32F2F' 'B71C1C' 'AD1457' 'EC407A' 'AB47BC' '6A1B9A' 'AA00FF' '5E35B1' '3F51B5' '1565C0' '0091EA' '00838F' '00897B' '388E3C' '558B2F' 'E65100' 'BF360C' '795548' '607D8B')
 AVATAR_COLORS_COUNT=${#AVATAR_COLORS[@]}
 
@@ -271,16 +275,33 @@ then
         username "${LDAP_LOGIN}" \
         uri "https://${GITLAB_SERVER}" \
         form_username 'username'
-        
-    # TODO: IP-address
     
-    #### Outlook ---------------------------------------------------------------
+    #### Exchange --------------------------------------------------------------
     
-    # TODO: subj
+    echo -n "${LDAP_PASSWORD}" | secret-tool store \
+        --label="Пароль для ${LDAP_EMAIL} в форме в https://${EXCHANGE_SERVER}" \
+        xdg:schema org.epiphany.FormPassword \
+        server_time_modified 0 \
+        id "{$(uuidgen)}" \
+        form_password 'password' \
+        target_origin "https://${EXCHANGE_SERVER}" \
+        username "${LDAP_EMAIL}" \
+        uri "https://${EXCHANGE_SERVER}" \
+        form_username 'username'
     
     #### Redmine ---------------------------------------------------------------
     
-    # TODO: subj
+    echo -n "${LDAP_PASSWORD}" | secret-tool store \
+        --label="Пароль для ${LDAP_EMAIL} в форме в http://${REDMINE_SERVER}" \
+        xdg:schema org.epiphany.FormPassword \
+        server_time_modified 0 \
+        id "{$(uuidgen)}" \
+        form_password 'password' \
+        target_origin "http://${REDMINE_SERVER}" \
+        username "${LDAP_EMAIL}" \
+        uri "http://${REDMINE_SERVER}" \
+        form_username 'username'
+
 fi
 
 #### Configure pidgin ==========================================================
