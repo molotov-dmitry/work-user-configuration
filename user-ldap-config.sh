@@ -247,6 +247,9 @@ fi
 git config --global user.name  "$GITLAB_FULLNAME"
 git config --global user.email "$LDAP_EMAIL"
 
+git config --global "credential.https://${GITLAB_SERVER}.username" "${LDAP_LOGIN}"
+git config --global "credential.https://${GITLAB_IP}.username"     "${LDAP_LOGIN}"
+
 #### ---------------------------------------------------------------------------
 
 fi
