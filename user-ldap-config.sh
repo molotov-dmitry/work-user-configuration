@@ -268,9 +268,9 @@ fi
 if ispkginstalled subversion
 then
 
-    echo -n "${LDAP_PASSWORD}" | secret-tool store --label="SVN password" \
-        xdg:schema org.gnome.keyring.NetworkPassword \
-        user "${LDAP_LOGIN}" \
+    echo -n "${LDAP_PASSWORD}" | secret-tool store --label="SVN password"   \
+        xdg:schema org.gnome.keyring.NetworkPassword                        \
+        user "${LDAP_LOGIN}"                                                \
         domain "${SVN_REALMSTRING}"
         
     mkdir -p "${HOME}/.subversion/auth/svn.simple"
