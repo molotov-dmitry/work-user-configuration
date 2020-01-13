@@ -136,7 +136,7 @@ AVATAR_COLORS_COUNT=${#AVATAR_COLORS[@]}
 
 #### Check LDAP login is correct ===============================================
 
-ldapoutput="$(ldapsearch -o ldif-wrap=no -x -u -LLL -h "$LDAP_FQDN" -D "$LDAP_EMAIL" -w "$LDAP_PASSWORD" -b "$LDAP_SEARCHBASE" "(mail=$LDAP_EMAIL)" "cn")"
+ldapoutput="$(ldapsearch -o ldif-wrap=no -x -u -LLL -h "$LDAP_FQDN" -D "$LDAP_EMAIL" -w "$LDAP_PASSWORD" -b "$LDAP_SEARCHBASE" "(mail=$LDAP_EMAIL)" "cn" "memberOf")"
 
 LDAP_FULLNAME="$(echo "$ldapoutput" | grep '^cn:: ' | cut -d ' ' -f 2 | base64 --decode)"
 
@@ -148,6 +148,8 @@ LDAP_MIDDLE_NAME="$(echo "${LDAP_FULLNAME}" | awk '{print $3}')"
 
 LDAP_FIRST_NAME_LETTER="${LDAP_FIRST_NAME:0:1}"
 LDAP_SURNAME_LETTER="${LDAP_SURNAME:0:1}"
+
+LDAP_DEPARTMENT="$(echo "$ldapoutput" | grep '^memberOf:: ' | cut -d ' ' -f 2 | base64 --decode | tr ',' '\n' | cut -d '=' -f 2 | grep '^Отдел' | head -n1)"
 
 if [[ -n "$LDAP_FULLNAME" ]]
 then
@@ -593,6 +595,12 @@ fi
 if [[ -n "${LDAP_MIDDLE_NAME}" ]]
 then
     reportconfig="$(echo "${reportconfig}" | jq ".\"userLastName\" = \"${LDAP_MIDDLE_NAME}\"")"
+fi
+
+if [[ -n "${LDAP_DEPARTMENT}" ]]
+then
+    department_name="$(echo "${LDAP_DEPARTMENT}" | sed 's/^Отдел //' | sed 's/ ПО\($\|[[:space:]]\)/ программного обеспечения\1/')"
+    reportconfig="$(echo "${reportconfig}" | jq ".\"department\" = \"${department_name}\"")"
 fi
 
 mkdir -p "${HOME}/.config/work-report"
