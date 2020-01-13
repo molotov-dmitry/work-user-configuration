@@ -301,7 +301,7 @@ fi
 
 if ispkginstalled gitg && ispkginstalled libsecret-tools
 then
-    if [[ -z "$(secret-tool search xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme 'https' host "${GITLAB_SERVER}")" ]]
+    if [[ -z "$(secret-tool search xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme 'https' host "${GITLAB_SERVER}" 2>/dev/null)" ]]
     then
         echo -n "${LDAP_PASSWORD}" | secret-tool store  \
             --label="https://${GITLAB_SERVER}"          \
@@ -311,7 +311,7 @@ then
             host "${GITLAB_SERVER}"
     fi
 
-    if [[ -z "$(secret-tool search xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme 'https' host "${GITLAB_IP}")" ]]
+    if [[ -z "$(secret-tool search xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme 'https' host "${GITLAB_IP}" 2>/dev/null)" ]]
     then
         echo -n "${LDAP_PASSWORD}" | secret-tool store  \
             --label="https://${GITLAB_IP}"              \
@@ -328,7 +328,7 @@ if ispkginstalled epiphany-browser
 then
     #### GitLab ----------------------------------------------------------------
     
-    if [[ -z "$(secret-tool search xdg:schema org.epiphany.FormPassword username "${LDAP_LOGIN}" uri "https://${GITLAB_SERVER}")" ]]
+    if [[ -z "$(secret-tool search xdg:schema org.epiphany.FormPassword username "${LDAP_LOGIN}" uri "https://${GITLAB_SERVER}" 2>/dev/null)" ]]
     then
         echo -n "${LDAP_PASSWORD}" | secret-tool store                              \
             --label="Пароль для ${LDAP_LOGIN} в форме в https://${GITLAB_SERVER}"   \
@@ -344,7 +344,7 @@ then
     
     #### Exchange --------------------------------------------------------------
     
-    if [[ -z "$(secret-tool search xdg:schema org.epiphany.FormPassword username "${LDAP_EMAIL}" uri "https://${EXCHANGE_SERVER}")" ]]
+    if [[ -z "$(secret-tool search xdg:schema org.epiphany.FormPassword username "${LDAP_EMAIL}" uri "https://${EXCHANGE_SERVER}" 2>/dev/null)" ]]
     then
         echo -n "${LDAP_PASSWORD}" | secret-tool store                              \
             --label="Пароль для ${LDAP_EMAIL} в форме в https://${EXCHANGE_SERVER}" \
@@ -360,7 +360,7 @@ then
     
     #### Redmine ---------------------------------------------------------------
     
-    if [[ -z "$(secret-tool search xdg:schema org.epiphany.FormPassword username "${LDAP_EMAIL}" uri "http://${REDMINE_SERVER}")" ]]
+    if [[ -z "$(secret-tool search xdg:schema org.epiphany.FormPassword username "${LDAP_EMAIL}" uri "http://${REDMINE_SERVER}" 2>/dev/null)" ]]
     then
         echo -n "${LDAP_PASSWORD}" | secret-tool store                              \
             --label="Пароль для ${LDAP_EMAIL} в форме в http://${REDMINE_SERVER}"   \
@@ -599,7 +599,7 @@ fi
 
 #### Create network share passord ==============================================
 
-if [[ -z "$(secret-tool search protocol 'smb' user "${LDAP_LOGIN}" server "${SMB_SERVER}" domain "${KERBEROS_FQDN}")" ]]
+if [[ -z "$(secret-tool search protocol 'smb' user "${LDAP_LOGIN}" server "${SMB_SERVER}" domain "${KERBEROS_FQDN}" 2>/dev/null)" ]]
 then
 
     echo -n "${LDAP_PASSWORD}" | secret-tool store      \
