@@ -268,10 +268,13 @@ fi
 if ispkginstalled subversion
 then
 
-    echo -n "${LDAP_PASSWORD}" | secret-tool store --label="SVN password"   \
-        xdg:schema org.gnome.keyring.NetworkPassword                        \
-        user "${LDAP_LOGIN}"                                                \
-        domain "${SVN_REALMSTRING}"
+    if [[ -z "$(secret-tool search xdg:schema org.gnome.keyring.NetworkPassword user "${LDAP_LOGIN}" domain "${SVN_REALMSTRING}" 2>/dev/null)" ]]
+    then
+        echo -n "${LDAP_PASSWORD}" | secret-tool store --label="SVN password"   \
+            xdg:schema org.gnome.keyring.NetworkPassword                        \
+            user "${LDAP_LOGIN}"                                                \
+            domain "${SVN_REALMSTRING}"
+    fi
         
     mkdir -p "${HOME}/.subversion/auth/svn.simple"
     
