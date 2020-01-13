@@ -110,6 +110,9 @@ LDAP_EMAIL="${LDAP_LOGIN}@${LDAP_FQDN}"
 
 LDAP_SEARCHBASE=$(prefix_join_by ',' "${LDAP_DOMAIN[@]}")
 
+KERBEROS_FQDN="${LDAP_FQDN^^}"
+KERBEROS_EMAIL="${LDAP_LOGIN}@${KERBEROS_FQDN}"
+
 GITLAB_TOKEN='YnHhW11Lf9tvb_JB9zuM'
 
 XMPP_SERVER="chat.${LDAP_FQDN}"
@@ -566,38 +569,72 @@ fi
 
 if ispkginstalled gnome-online-accounts
 then
-    :
-#mkdir -p /home/dmitry/.config/goa-1.0
 
-#if ! grep "Provider=kerberos" "$HOME/.config/goa-1.0/accounts.conf" >/dev/null 2>/dev/null
-#then
-#cat >> "$HOME/.config/goa-1.0/accounts.conf" << _EOF
-#[Account account_1564571125_0]
-#Provider=kerberos
-#Identity=${LDAP_EMAIL}
-#PresentationIdentity=${LDAP_EMAIL}
-#Realm=${LDAP_FQDN}
-#IsTemporary=false
-#TicketingEnabled=true
+mkdir -p /home/dmitry/.config/goa-1.0
 
-#_EOF
-#fi
+acc_id="$(grep '^\[Account ' .config/goa-1.0/accounts.conf | sed 's/.*_//g;s/\].*//g' | sort -g | tail -n1)"
 
-#if ! grep "Provider=exchange" "$HOME/.config/goa-1.0/accounts.conf" >/dev/null 2>/dev/null
-#then
-#cat >> "$HOME/.config/goa-1.0/accounts.conf" << _EOF
-#[Account account_1566981726_0]
-#Provider=exchange
-#Identity=${LDAP_LOGIN}
-#PresentationIdentity=${LDAP_EMAIL}
-#MailEnabled=true
-#CalendarEnabled=true
-#ContactsEnabled=true
-#Host=${LDAP_FQDN}
-#AcceptSslErrors=true
+if [[ -z "$acc_id" ]]
+then
+    acc_id=0
+else
+    let acc_id++
+fi
 
-#_EOF
-#fi
+## Kerberos --------------------------------------------------------------------
+
+if ! grep "Provider=kerberos" "$HOME/.config/goa-1.0/accounts.conf" >/dev/null 2>/dev/null
+then
+
+    date_create=$(date +%s)
+
+    echo -n "{'password': <'${LDAP_PASSWORD}'>}" | secret-tool store                                \
+        --label="Учётные данные GOA kerberos для идентификатора account_${date_create}_${acc_id}"   \
+        xdg:schema org.gnome.OnlineAccounts                                                         \
+        goa-identity "kerberos:gen0:account_${date_create}_${acc_id}"
+
+    cat >> "$HOME/.config/goa-1.0/accounts.conf" << _EOF
+[Account account_${date_create}_${acc_id}]
+Provider=kerberos
+Identity=${KERBEROS_EMAIL}
+PresentationIdentity=${KERBEROS_EMAIL}
+Realm=${KERBEROS_FQDN}
+IsTemporary=false
+TicketingEnabled=true
+
+_EOF
+
+let acc_id++
+
+fi
+
+## Exchange --------------------------------------------------------------------
+
+if ! grep "Provider=exchange" "$HOME/.config/goa-1.0/accounts.conf" >/dev/null 2>/dev/null
+then
+
+    date_create=$(date +%s)
+
+    echo -n "{'password': <'${LDAP_PASSWORD}'>}" | secret-tool store                                \
+        --label="Учётные данные GOA exchange для идентификатора account_${date_create}_${acc_id}"   \
+        xdg:schema org.gnome.OnlineAccounts                                                         \
+        goa-identity "exchange:gen0:account_${date_create}_${acc_id}"
+
+    cat >> "$HOME/.config/goa-1.0/accounts.conf" << _EOF
+[Account account_${date_create}_${acc_id}]
+Provider=exchange
+Identity=${LDAP_LOGIN}
+PresentationIdentity=${LDAP_EMAIL}
+MailEnabled=true
+CalendarEnabled=true
+ContactsEnabled=true
+Host=${EXCHANGE_SERVER}
+AcceptSslErrors=true
+
+_EOF
+fi
+
+## -----------------------------------------------------------------------------
 
 fi
 
