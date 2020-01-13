@@ -122,6 +122,10 @@ REDMINE_SERVER="redmine.rczifort.local"
 
 EXCHANGE_SERVER="ex01.rczifort.local"
 
+SVN_SERVER="172.16.8.81:3690"
+SVN_REALM="RCZI DEV SVN"
+SVN_REALMSTRING="<svn://${SVN_SERVER}> ${SVN_REALM}"
+
 AVATAR_COLORS=('D32F2F' 'B71C1C' 'AD1457' 'EC407A' 'AB47BC' '6A1B9A' 'AA00FF' '5E35B1' '3F51B5' '1565C0' '0091EA' '00838F' '00897B' '388E3C' '558B2F' 'E65100' 'BF360C' '795548' '607D8B')
 AVATAR_COLORS_COUNT=${#AVATAR_COLORS[@]}
 
@@ -252,6 +256,36 @@ git config --global "credential.https://${GITLAB_IP}.username"     "${LDAP_LOGIN
 
 #### ---------------------------------------------------------------------------
 
+fi
+
+#### Configure Subversion ======================================================
+
+if ispkginstalled subversion
+then
+
+    echo -n "${LDAP_PASSWORD}" | secret-tool store --label="SVN password" \
+        xdg:schema org.gnome.keyring.NetworkPassword \
+        user "${LDAP_LOGIN}" \
+        domain "${SVN_REALMSTRING}"
+        
+    mkdir -p "${HOME}/.subversion/auth/svn.simple"
+    
+    cat << _EOF > "${HOME}/.subversion/auth/svn.simple/$(echo -n "${SVN_REALMSTRING}" | md5sum | cut -d ' ' -f 1)"
+K 8
+passtype
+V 13
+gnome-keyring
+K 15
+svn:realmstring
+V ${#SVN_REALMSTRING}
+${SVN_REALMSTRING}
+K 8
+username
+V ${#LDAP_LOGIN}
+d.sorokin
+END
+_EOF
+        
 fi
 
 #### Configure gitg ============================================================
