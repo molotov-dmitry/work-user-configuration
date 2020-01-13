@@ -307,42 +307,51 @@ if ispkginstalled epiphany-browser
 then
     #### GitLab ----------------------------------------------------------------
     
-    echo -n "${LDAP_PASSWORD}" | secret-tool store \
-        --label="Пароль для ${LDAP_LOGIN} в форме в https://${GITLAB_SERVER}" \
-        xdg:schema org.epiphany.FormPassword \
-        server_time_modified 0 \
-        id "{$(uuidgen)}" \
-        form_password 'password' \
-        target_origin "https://${GITLAB_SERVER}" \
-        username "${LDAP_LOGIN}" \
-        uri "https://${GITLAB_SERVER}" \
-        form_username 'username'
+    if [[ -z "$(secret-tool search xdg:schema org.epiphany.FormPassword username "${LDAP_LOGIN}" uri "https://${GITLAB_SERVER}")" ]]
+    then
+        echo -n "${LDAP_PASSWORD}" | secret-tool store                              \
+            --label="Пароль для ${LDAP_LOGIN} в форме в https://${GITLAB_SERVER}"   \
+            xdg:schema org.epiphany.FormPassword                                    \
+            server_time_modified 0                                                  \
+            id "{$(uuidgen)}"                                                       \
+            form_password 'password'                                                \
+            target_origin "https://${GITLAB_SERVER}"                                \
+            username "${LDAP_LOGIN}"                                                \
+            uri "https://${GITLAB_SERVER}"                                          \
+            form_username 'username'
+    fi
     
     #### Exchange --------------------------------------------------------------
     
-    echo -n "${LDAP_PASSWORD}" | secret-tool store \
-        --label="Пароль для ${LDAP_EMAIL} в форме в https://${EXCHANGE_SERVER}" \
-        xdg:schema org.epiphany.FormPassword \
-        server_time_modified 0 \
-        id "{$(uuidgen)}" \
-        form_password 'password' \
-        target_origin "https://${EXCHANGE_SERVER}" \
-        username "${LDAP_EMAIL}" \
-        uri "https://${EXCHANGE_SERVER}" \
-        form_username 'username'
+    if [[ -z "$(secret-tool search xdg:schema org.epiphany.FormPassword username "${LDAP_EMAIL}" uri "https://${EXCHANGE_SERVER}")" ]]
+    then
+        echo -n "${LDAP_PASSWORD}" | secret-tool store                              \
+            --label="Пароль для ${LDAP_EMAIL} в форме в https://${EXCHANGE_SERVER}" \
+            xdg:schema org.epiphany.FormPassword                                    \
+            server_time_modified 0                                                  \
+            id "{$(uuidgen)}"                                                       \
+            form_password 'password'                                                \
+            target_origin "https://${EXCHANGE_SERVER}"                              \
+            username "${LDAP_EMAIL}"                                                \
+            uri "https://${EXCHANGE_SERVER}"                                        \
+            form_username 'username'
+    fi
     
     #### Redmine ---------------------------------------------------------------
     
-    echo -n "${LDAP_PASSWORD}" | secret-tool store \
-        --label="Пароль для ${LDAP_EMAIL} в форме в http://${REDMINE_SERVER}" \
-        xdg:schema org.epiphany.FormPassword \
-        server_time_modified 0 \
-        id "{$(uuidgen)}" \
-        form_password 'password' \
-        target_origin "http://${REDMINE_SERVER}" \
-        username "${LDAP_EMAIL}" \
-        uri "http://${REDMINE_SERVER}" \
-        form_username 'username'
+    if [[ -z "$(secret-tool search xdg:schema org.epiphany.FormPassword username "${LDAP_EMAIL}" uri "http://${REDMINE_SERVER}")" ]]
+    then
+        echo -n "${LDAP_PASSWORD}" | secret-tool store                              \
+            --label="Пароль для ${LDAP_EMAIL} в форме в http://${REDMINE_SERVER}"   \
+            xdg:schema org.epiphany.FormPassword                                    \
+            server_time_modified 0                                                  \
+            id "{$(uuidgen)}"                                                       \
+            form_password 'password'                                                \
+            target_origin "http://${REDMINE_SERVER}"                                \
+            username "${LDAP_EMAIL}"                                                \
+            uri "http://${REDMINE_SERVER}"                                          \
+            form_username 'username'
+    fi
 
 fi
 
