@@ -405,8 +405,42 @@ then
     
     #### Create account icons --------------------------------------------------
     
-    convert -resize 96x96 "${HOME}/.face" "$HOME/.purple/icons/${xmppiconuuid}.png"
-    cp -f                 "${HOME}/.face" "$HOME/.purple/icons/${bonjouriconuuid}.png"
+    srcw=$(identify -format "%w" "${HOME}/.face")
+    srch=$(identify -format "%h" "${HOME}/.face")
+
+    for size in 512 384 256 192 128 96 64 48 32 24
+    do
+        if [[ $srcw -lt $size || $srch -lt $size ]]
+        then
+            continue
+        fi
+        
+        convert -resize ${size}x${size} "${HOME}/.face" "$HOME/.purple/icons/${bonjouriconuuid}.png"
+        
+        if [[ "$(stat -c "%s" $dst)" -lt 51200 ]]
+        then
+            break
+        fi
+        
+        rm -f "$HOME/.purple/icons/${bonjouriconuuid}.png"
+    done
+
+    for size in 96 88 80 72 64 56 48 40 32
+    do
+        if [[ $srcw -lt $size || $srch -lt $size ]]
+        then
+            continue
+        fi
+        
+        convert -resize ${size}x${size} "${HOME}/.face" "$HOME/.purple/icons/${xmppiconuuid}.png"
+        
+        if [[ "$(stat -c "%s" $dst)" -lt 8192 ]]
+        then
+            break
+        fi
+        
+        rm -f "$HOME/.purple/icons/${xmppiconuuid}.png"
+    done
     
     #### Overwrite Pidgin config file ------------------------------------------
 
