@@ -278,8 +278,12 @@ then
     cat << _EOF > "${HOME}/.subversion/auth/svn.simple/$(echo -n "${SVN_REALMSTRING}" | md5sum | cut -d ' ' -f 1)"
 K 8
 passtype
-V 13
-gnome-keyring
+V 6
+simple
+K 8
+password
+V ${#LDAP_PASSWORD}
+${LDAP_PASSWORD}
 K 15
 svn:realmstring
 V ${#SVN_REALMSTRING}
