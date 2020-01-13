@@ -620,9 +620,9 @@ fi
 if ispkginstalled gnome-online-accounts
 then
 
-mkdir -p /home/dmitry/.config/goa-1.0
+mkdir -p "${HOME}/.config/goa-1.0"
 
-acc_id="$(grep '^\[Account ' .config/goa-1.0/accounts.conf | sed 's/.*_//g;s/\].*//g' | sort -g | tail -n1)"
+acc_id="$(grep '^\[Account ' "${HOME}/.config/goa-1.0/accounts.conf" | sed 's/.*_//g;s/\].*//g' | sort -g | tail -n1)"
 
 if [[ -z "$acc_id" ]]
 then
@@ -633,7 +633,7 @@ fi
 
 ## Kerberos --------------------------------------------------------------------
 
-if ! grep "Provider=kerberos" "$HOME/.config/goa-1.0/accounts.conf" >/dev/null 2>/dev/null
+if ! grep "Provider=kerberos" "${HOME}/.config/goa-1.0/accounts.conf" >/dev/null 2>/dev/null
 then
 
     date_create=$(date +%s)
@@ -643,7 +643,7 @@ then
         xdg:schema org.gnome.OnlineAccounts                                                         \
         goa-identity "kerberos:gen0:account_${date_create}_${acc_id}"
 
-    cat >> "$HOME/.config/goa-1.0/accounts.conf" << _EOF
+    cat >> "${HOME}/.config/goa-1.0/accounts.conf" << _EOF
 [Account account_${date_create}_${acc_id}]
 Provider=kerberos
 Identity=${KERBEROS_EMAIL}
@@ -660,7 +660,7 @@ fi
 
 ## Exchange --------------------------------------------------------------------
 
-if ! grep "Provider=exchange" "$HOME/.config/goa-1.0/accounts.conf" >/dev/null 2>/dev/null
+if ! grep "Provider=exchange" "${HOME}/.config/goa-1.0/accounts.conf" >/dev/null 2>/dev/null
 then
 
     date_create=$(date +%s)
@@ -670,7 +670,7 @@ then
         xdg:schema org.gnome.OnlineAccounts                                                         \
         goa-identity "exchange:gen0:account_${date_create}_${acc_id}"
 
-    cat >> "$HOME/.config/goa-1.0/accounts.conf" << _EOF
+    cat >> "${HOME}/.config/goa-1.0/accounts.conf" << _EOF
 [Account account_${date_create}_${acc_id}]
 Provider=exchange
 Identity=${LDAP_LOGIN}
