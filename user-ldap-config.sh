@@ -301,8 +301,25 @@ fi
 
 if ispkginstalled gitg && ispkginstalled libsecret-tools
 then
-    echo -n "${LDAP_PASSWORD}" | secret-tool store --label="https://${GITLAB_SERVER}" xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme 'https' host "${GITLAB_SERVER}"
-    echo -n "${LDAP_PASSWORD}" | secret-tool store --label="https://${GITLAB_IP}"     xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme 'https' host "${GITLAB_IP}"
+    if [[ -z "$(secret-tool search xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme 'https' host "${GITLAB_SERVER}")" ]]
+    then
+        echo -n "${LDAP_PASSWORD}" | secret-tool store  \
+            --label="https://${GITLAB_SERVER}"          \
+            xdg:schema org.gnome.gitg.Credentials       \
+            user "${LDAP_LOGIN}"                        \
+            scheme 'https'                              \
+            host "${GITLAB_SERVER}"
+    fi
+
+    if [[ -z "$(secret-tool search xdg:schema org.gnome.gitg.Credentials user "${LDAP_LOGIN}" scheme 'https' host "${GITLAB_IP}")" ]]
+    then
+        echo -n "${LDAP_PASSWORD}" | secret-tool store  \
+            --label="https://${GITLAB_IP}"              \
+            xdg:schema org.gnome.gitg.Credentials       \
+            user "${LDAP_LOGIN}"                        \
+            scheme 'https'                              \
+            host "${GITLAB_IP}"
+    fi
 fi
 
 #### Configure Epiphany ========================================================
