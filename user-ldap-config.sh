@@ -408,6 +408,8 @@ then
     srcw=$(identify -format "%w" "${HOME}/.face")
     srch=$(identify -format "%h" "${HOME}/.face")
 
+    dst="$HOME/.purple/icons/${bonjouriconuuid}.png"
+
     for size in 512 384 256 192 128 96 64 48 32 24
     do
         if [[ $srcw -lt $size || $srch -lt $size ]]
@@ -415,15 +417,17 @@ then
             continue
         fi
         
-        convert -resize ${size}x${size} "${HOME}/.face" "$HOME/.purple/icons/${bonjouriconuuid}.png"
+        convert -resize ${size}x${size} "${HOME}/.face" "$dst"
         
-        if [[ "$(stat -c "%s" $dst)" -lt 51200 ]]
+        if [[ "$(stat -c "%s" "$dst")" -lt 51200 ]]
         then
             break
         fi
         
-        rm -f "$HOME/.purple/icons/${bonjouriconuuid}.png"
+        rm -f "$dst"
     done
+
+    dst="$HOME/.purple/icons/${xmppiconuuid}.png"
 
     for size in 96 88 80 72 64 56 48 40 32
     do
@@ -432,14 +436,14 @@ then
             continue
         fi
         
-        convert -resize ${size}x${size} "${HOME}/.face" "$HOME/.purple/icons/${xmppiconuuid}.png"
+        convert -resize ${size}x${size} "${HOME}/.face" "$dst"
         
-        if [[ "$(stat -c "%s" $dst)" -lt 8192 ]]
+        if [[ "$(stat -c "%s" "$dst")" -lt 8192 ]]
         then
             break
         fi
         
-        rm -f "$HOME/.purple/icons/${xmppiconuuid}.png"
+        rm -f "$dst"
     done
     
     #### Overwrite Pidgin config file ------------------------------------------
