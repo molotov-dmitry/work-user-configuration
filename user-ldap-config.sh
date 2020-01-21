@@ -130,6 +130,7 @@ SVN_REALM="RCZI DEV SVN"
 SVN_REALMSTRING="<svn://${SVN_SERVER}> ${SVN_REALM}"
 
 SMB_SERVER="data.${LDAP_FQDN}"
+SMB_IP="172.16.56.23"
 
 AVATAR_COLORS=('D32F2F' 'B71C1C' 'AD1457' 'EC407A' 'AB47BC' '6A1B9A' 'AA00FF' '5E35B1' '3F51B5' '1565C0' '0091EA' '00838F' '00897B' '388E3C' '558B2F' 'E65100' 'BF360C' '795548' '607D8B')
 AVATAR_COLORS_COUNT=${#AVATAR_COLORS[@]}
@@ -658,6 +659,19 @@ then
         user "${LDAP_LOGIN}"                            \
         server "${SMB_SERVER}"                          \
         domain "${KERBEROS_FQDN}"
+
+fi
+
+if [[ -z "$(secret-tool search protocol 'smb' user "${LDAP_LOGIN}" server "${SMB_IP}" domain "${LDAP_FQDN}" 2>/dev/null)" ]]
+then
+
+    echo -n "${LDAP_PASSWORD}" | secret-tool store      \
+        --label="${LDAP_EMAIL}"                         \
+        xdg:schema org.gnome.keyring.NetworkPassword    \
+        protocol 'smb'                                  \
+        user "${LDAP_LOGIN}"                            \
+        server "${SMB_IP}"                              \
+        domain "${LDAP_FQDN}"
 
 fi
 
