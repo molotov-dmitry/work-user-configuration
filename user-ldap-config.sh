@@ -89,6 +89,15 @@ do
     fi
 done
 
+while true
+do
+    ping -w 1 -c 1 rczifort.local && break
+    echo 'LDAP server unavailable'
+done
+
+echo 'LDAP server available'
+echo
+
 while [[ -z "${LDAP_LOGIN}" ]]
 do
     read -p 'LDAP username: ' LDAP_LOGIN
