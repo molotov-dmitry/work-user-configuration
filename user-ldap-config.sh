@@ -119,7 +119,7 @@ done
 
 while true
 do
-    ping -w 1 -c 1 rczifort.local && break
+    ping -w 1 -c 1 rczifort.local > /dev/null && break
     echo 'LDAP server unavailable'
 done
 
