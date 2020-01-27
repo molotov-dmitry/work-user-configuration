@@ -64,6 +64,34 @@ function disableautostart()
     echo "autostart=false" > "${HOME}/.config/user-ldap-config/setup-done"
 }
 
+function gsettingsadd()
+{
+    category="$1"
+    setting="$2"
+    value="$3"
+
+    valuelist=$(gsettings get $category $setting | sed "s/\['//g" | sed "s/'\]//g" | sed "s/'\, '/\n/g" | sed '/@as \[\]/d')
+
+    if [[ -n "$(echo "${valuelist}" | grep ^${value}$)" ]]
+    then
+        return 0
+    fi
+
+    if [[ -n "${valuelist}" ]]
+    then
+        valuelist="${valuelist}
+"
+    fi
+
+    valuelist="${valuelist}${value}"
+
+    newvalue="[$(echo "$valuelist" | sed "s/^/'/;s/$/'/" | tr '\n' '\t' | sed 's/\t$//' | sed 's/\t/, /g')]"
+
+    gsettings set $category $setting "${newvalue}"
+
+    return $?
+}
+
 #### Input credentials =========================================================
 
 while true
