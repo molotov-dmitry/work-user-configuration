@@ -159,6 +159,7 @@ GITLAB_SERVER="git.${LDAP_FQDN}"
 GITLAB_IP="172.16.56.22"
 
 REDMINE_SERVER="redmine.${LDAP_FQDN}"
+REDMINE_EMAIL="${LDAP_EMAIL/@/%40}"
 
 EXCHANGE_SERVER="ex01.${LDAP_FQDN}"
 
@@ -783,6 +784,20 @@ fi
 
 ## -----------------------------------------------------------------------------
 
+fi
+
+#### Configure Redmine Gnome Shell extension ===================================
+
+if ispkginstalled gnome-shell
+then
+    dconf write /org/gnome/shell/extensions/redmine-issues/api-access-key               "' '"
+    dconf write /org/gnome/shell/extensions/redmine-issues/auto-refresh                 15
+    dconf write /org/gnome/shell/extensions/redmine-issues/group-by                     "'status'"
+    dconf write /org/gnome/shell/extensions/redmine-issues/redmine-url                  "'http://${REDMINE_EMAIL}:${LDAP_PASSWORD}@${REDMINE_SERVER}/redmine'"
+    dconf write /org/gnome/shell/extensions/redmine-issues/show-status-item-assigned-to false
+    dconf write /org/gnome/shell/extensions/redmine-issues/show-status-item-project     true
+    
+    gsettingsadd org.gnome.shell enabled-extensions 'redmineIssues@UshakovVasilii_Github.yahoo.com'
 fi
 
 #### Remove autostart script ===================================================
