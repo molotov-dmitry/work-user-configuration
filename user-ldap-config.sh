@@ -335,7 +335,7 @@ ${SVN_REALMSTRING}
 K 8
 username
 V ${#LDAP_LOGIN}
-d.sorokin
+${LDAP_LOGIN}
 END
 _EOF
         
