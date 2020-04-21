@@ -221,19 +221,27 @@ fi
 
 #### Change user name ==========================================================
 
-if [[ -n "$LDAP_GDM_NAME" ]]
+if [[ -n "$LDAP_GDM_NAME" && "$USER" != 'rczi' ]]
 then
     sudo usermod -c "$LDAP_GDM_NAME" "$USER"
 fi
 
 #### Update avatar =============================================================
 
+if [[ "$USER" == 'rczi' ]]
+then
+    cp -f /usr/share/pixmaps/rczi.png "${HOME}/.face"
+fi
+
 if [[ -n "${GITLAB_AVATAR}" ]]
 then
 
     #### Download avatar from GitLab -------------------------------------------
 
-    wget -qqq --no-check-certificate "${GITLAB_AVATAR}" -O "${HOME}/.face"
+    if [[ ! -s "${HOME}/.face" || "$USER" != 'rczi' ]]
+    then
+        wget -qqq --no-check-certificate "${GITLAB_AVATAR}" -O "${HOME}/.face"
+    fi  
     
     #### Generate avatar if not exists -----------------------------------------
     
