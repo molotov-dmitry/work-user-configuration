@@ -92,6 +92,11 @@ function gsettingsadd()
     return $?
 }
 
+safestring()
+{
+    echo "$@" | sed 's/\//\\\//g'
+}
+
 #### Input credentials =========================================================
 
 while true
@@ -226,58 +231,61 @@ then
     sudo usermod -c "$LDAP_GDM_NAME" "$USER"
 fi
 
-#### Update avatar =============================================================
+#### Generate user icons =======================================================
+
+avatar_chat="${HOME}/.face"
+avatar_user="${HOME}/.face"
 
 if [[ "$USER" == 'rczi' ]]
 then
-    cp -f /usr/share/pixmaps/rczi.png "${HOME}/.face"
+    avatar_chat="${HOME}/.purple/avatar.png"
+    mkdir -p "$(dirname "$avatar_chat")"
+    cp -f /usr/share/pixmaps/rczi.png "$avatar_user"
 fi
+
+#### Download avatar from GitLab -----------------------------------------------
 
 if [[ -n "${GITLAB_AVATAR}" ]]
 then
+    wget -qqq --no-check-certificate "${GITLAB_AVATAR}" -O "$avatar_chat"
+fi
 
-    #### Download avatar from GitLab -------------------------------------------
+#### Generate icon if not downloaded -------------------------------------------
 
-    if [[ ! -s "${HOME}/.face" || "$USER" != 'rczi' ]]
+if [[ ! -s "$avatar_chat" ]] && which rsvg-convert >/dev/null
+then
+    USER_NAME_LETTER="${LDAP_FIRST_NAME_LETTER}"
+    INDEX=$(( (RANDOM * RANDOM + RANDOM) % AVATAR_COLORS_COUNT ))
+    bgcolor="#${AVATAR_COLORS[$INDEX]}"
+    fgfont="Arial"
+    
+    if [[ "gpqy" == *"${USER_NAME_LETTER}"* || "аруцд" == *"${USER_NAME_LETTER}"* ]]
     then
-        wget -qqq --no-check-certificate "${GITLAB_AVATAR}" -O "${HOME}/.face"
-    fi  
-    
-    #### Generate avatar if not exists -----------------------------------------
-    
-    if [[ ! -s "${HOME}/.face" ]] && which convert >/dev/null && which rsvg-convert >/dev/null
+        dy=25
+    elif [[ "У"  == *"${USER_NAME_LETTER}"* ]]
     then
-        USER_NAME_LETTER="${LDAP_FIRST_NAME_LETTER}"
-        INDEX=$(( (RANDOM * RANDOM + RANDOM) % AVATAR_COLORS_COUNT ))
-        bgcolor="#${AVATAR_COLORS[$INDEX]}"
-        fgfont="Arial"
-        
-        if [[ "gpqy" == *"${USER_NAME_LETTER}"* || "аруцд" == *"${USER_NAME_LETTER}"* ]]
-        then
-            dy=25
-        elif [[ "У"  == *"${USER_NAME_LETTER}"* ]]
-        then
-            dy=40
-        elif [[ "${USER_NAME_LETTER}" == "${USER_NAME_LETTER^^}" && "Д" != *"${USER_NAME_LETTER}"* ]]
-        then
-            dy=35
-        else
-            dy=30
-        fi
-    
-        cat << _EOF | rsvg-convert -w 512 -h 512 -f png -o "${HOME}/.face"
+        dy=40
+    elif [[ "${USER_NAME_LETTER}" == "${USER_NAME_LETTER^^}" && "Д" != *"${USER_NAME_LETTER}"* ]]
+    then
+        dy=35
+    else
+        dy=30
+    fi
+
+    cat << _EOF | rsvg-convert -w 512 -h 512 -f png -o "$avatar_chat"
 <svg width="1000" height="1000">
   <circle cx="500" cy="500" r="400" fill="${bgcolor}" />
   <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="500px" dy="0.${dy}em" font-family="${fgfont}">${USER_NAME_LETTER}</text>
 </svg>
 _EOF
-    fi
-    
-    #### Configure account icon ------------------------------------------------
+fi
 
+#### Configure account icon ----------------------------------------------------
+
+if [[ -s "$avatar_user" ]]
+then
     sudo mkdir -p '/var/lib/AccountsService/icons/'
-
-    sudo cp -f "${HOME}/.face" "/var/lib/AccountsService/icons/${USER}"
+    sudo cp -f "$avatar_user" "/var/lib/AccountsService/icons/${USER}"
 
     FUNC="$(declare -f addconfigline)"
     sudo bash -c "$FUNC; addconfigline Icon \"/var/lib/AccountsService/icons/${USER}\" User \"/var/lib/AccountsService/users/${USER}\""
@@ -452,8 +460,8 @@ then
     
     #### Create account icons --------------------------------------------------
     
-    srcw=$(identify -format "%w" "${HOME}/.face")
-    srch=$(identify -format "%h" "${HOME}/.face")
+    srcw=$(identify -format "%w" "$avatar_chat")
+    srch=$(identify -format "%h" "$avatar_chat")
 
     dst="$HOME/.purple/icons/${bonjouriconuuid}.png"
 
@@ -464,7 +472,7 @@ then
             continue
         fi
         
-        convert -resize ${size}x${size} "${HOME}/.face" "$dst"
+        convert -resize ${size}x${size} "$avatar_chat" "$dst"
         
         if [[ "$(stat -c "%s" "$dst")" -lt 51200 ]]
         then
@@ -483,7 +491,7 @@ then
             continue
         fi
         
-        convert -resize ${size}x${size} "${HOME}/.face" "$dst"
+        convert -resize ${size}x${size} "$avatar_chat" "$dst"
         
         if [[ "$(stat -c "%s" "$dst")" -lt 8192 ]]
         then
@@ -528,6 +536,13 @@ then
 	</account>
 </account>
 _EOF
+
+    #### Configure global buddy icon -------------------------------------------
+    
+    if grep "<pref name='buddyicon' type='path' value='[^']*'/>"  "${HOME}/.purple/prefs.xml" >/dev/null 2>/dev/null
+    then
+        sed -i "s/<pref name='buddyicon' type='path' value='[^']*'\/>/<pref name='buddyicon' type='path' value='$(safestring "${avatar_chat}")'\/>/" "${HOME}/.purple/prefs.xml"
+    fi
 
     #### Create autostart entry for pidgin -------------------------------------
     
@@ -638,7 +653,7 @@ GlobalStatusTitle=В сети
 _EOF
 
     mkdir -p "${HOME}/.local/share/kopete/avatars/User"
-    cp -f "${HOME}/.face" "${HOME}/.local/share/kopete/avatars/User/${kopete_identity}.png"
+    cp -f "$avatar_chat" "${HOME}/.local/share/kopete/avatars/User/${kopete_identity}.png"
     
     wallet_id="$(qdbus org.kde.kwalletd5 /modules/kwalletd5 org.kde.KWallet.open kdewallet 0 "Kopete")"
     
