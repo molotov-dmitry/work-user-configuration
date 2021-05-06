@@ -511,6 +511,7 @@ then
         <protocol>prpl-jabber</protocol>
         <name>${XMPP_EMAIL}/</name>
         <password>${LDAP_PASSWORD}</password>
+        <alias>${LDAP_FULLNAME}</alias>
         <settings ui='gtk-gaim'>
             <setting name='auto-login' type='bool'>1</setting>
         </settings>
