@@ -27,6 +27,26 @@ safestring()
     echo "${inputstr}" | sed 's/\\/\\\\/g;s/\//\\\//g'
 }
 
+getconfigline()
+{
+    local key="$1"
+    local section="$2"
+    local file="$3"
+    local default="$4"
+
+    if [[ -r "$file" ]]
+    then
+        local result="$(sed -n "/^[ \t]*\[$(safestring "${section}")\]/,/^[ \t]*\[/s/^[ \t]*$(safestring "${key}")[ \t]*=[ \t]*//p" "${file}")"
+    fi
+
+    if [[ -z "$result" ]]
+    then
+        result="$default"
+    fi
+
+    echo "$result"
+}
+
 addconfigline()
 {
     local key="$1"
