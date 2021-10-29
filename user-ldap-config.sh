@@ -27,6 +27,11 @@ safestring()
     echo "${inputstr}" | sed 's/\\/\\\\/g;s/\//\\\//g'
 }
 
+utf16escaped()
+{
+    echo -n "$@" | iconv -t UTF-16BE | xxd -p | tr -d '\n' | while read -n 4 u; do printf '\\x%x' "0x$u"; done | sed 's/\\x20/ /g'
+}
+
 getconfigline()
 {
     local key="$1"
