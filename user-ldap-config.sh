@@ -699,6 +699,138 @@ fi
 
 fi
 
+#### Configure KMail ===========================================================
+
+if ispkginstalled kmail
+then
+
+    count_resources_ews="$(getconfigline    'akonadi_ews_resource\InstanceCounter'    'InstanceCounters' "${HOME}/.config/akonadi/agentsrc" '0')"
+    count_resources_ewsmta="$(getconfigline 'akonadi_ewsmta_resource\InstanceCounter' 'InstanceCounters' "${HOME}/.config/akonadi/agentsrc" '0')"
+
+    index_resources_ews=-1
+    index_resources_ewsmta=-1
+    
+    restart_akonadi=0
+
+    for (( i = 0; i < $count_resources_ews; i++ ))
+    do
+        if [[ "$(getconfigline 'Email' 'General' "${HOME}/.config/akonadi_ews_resource_${i}rc")" == "${LDAP_EMAIL}" ]]
+        then
+            index_resources_ews=$i
+            break
+        fi
+    done
+
+    if [[ ${index_resources_ews} -lt 0 ]]
+    then
+        ## Akonadi resource ----------------------------------------------------
+
+        index_resources_ews="${count_resources_ews}"
+        i="${count_resources_ews}"
+
+        addconfigline 'BaseUrl'  "https://ex01.${LDAP_FQDN}/EWS/Exchange.asmx" 'General' "${HOME}/.config/akonadi_ews_resource_${i}rc"
+
+        addconfigline 'Domain'   "${LDAP_FQDN}"  'General' "${HOME}/.config/akonadi_ews_resource_${i}rc"
+        addconfigline 'Email'    "${LDAP_EMAIL}" 'General' "${HOME}/.config/akonadi_ews_resource_${i}rc"
+        addconfigline 'Username' "${LDAP_LOGIN}" 'General' "${HOME}/.config/akonadi_ews_resource_${i}rc"
+
+        addconfigline 'RetrievalMethod' '1' 'General' "${HOME}/.config/akonadi_ews_resource_${i}rc"
+
+        let count_resources_ews++
+
+        ## Akonadi agent -------------------------------------------------------
+
+        addconfigline 'Name' "$(utf16escaped "${LDAP_GDM_NAME}")" 'Agent' "${HOME}/.config/akonadi/agent_config_akonadi_ews_resource_${i}"
+
+        addconfigline 'akonadi_ews_resource\InstanceCounter' "${count_resources_ews}" 'InstanceCounters' "${HOME}/.config/akonadi/agentsrc"
+        addconfigline "akonadi_ews_resource_${i}\AgentType"  'akonadi_ews_resource'   'Instances'        "${HOME}/.config/akonadi/agentsrc"
+
+        ## Get mail on startup -------------------------------------------------
+        
+        addconfigline 'CheckOnStartup' 'true' "Resource akonadi_ews_resource_${i}" "${HOME}/.config/kmail2rc"
+        
+        ## Password ------------------------------------------------------------
+
+        wallet_id="$(qdbus org.kde.kwalletd5 /modules/kwalletd5 org.kde.KWallet.open kdewallet 0 "akonadi-ews")"
+
+        qdbus org.kde.kwalletd5 /modules/kwalletd5 createFolder     "${wallet_id}" "akonadi-ews" "akonadi-ews"
+        qdbus org.kde.kwalletd5 /modules/kwalletd5 writePassword    "${wallet_id}" "akonadi-ews" "akonadi_ews_resource_${i}rc" "${LDAP_PASSWORD}" "akonadi-ews"
+        
+        restart_akonadi=1
+
+    fi
+
+    for (( i = 0; i < $count_resources_ewsmta; i++ ))
+    do
+        if [[ "$(getconfigline 'EwsResource' 'General' "${HOME}/.config/akonadi_ewsmta_resource_${i}rc")" == "akonadi_ews_resource_${index_resources_ews}" ]]
+        then
+            index_resources_ewsmta=$i
+            break
+        fi
+    done
+
+    if [[ ${index_resources_ewsmta} -lt 0 ]]
+    then
+        ## Akonadi resource ----------------------------------------------------
+
+        index_resources_ewsmta="${count_resources_ewsmta}"
+        i="${count_resources_ewsmta}"
+
+        addconfigline 'EwsResource' "akonadi_ews_resource_${index_resources_ews}" 'General' "${HOME}/.config/akonadi_ewsmta_resource_${i}rc"
+
+        let count_resources_ewsmta++
+
+        ## Akonadi agent -------------------------------------------------------
+
+        addconfigline 'Name' "$(utf16escaped "${LDAP_GDM_NAME}")" 'Agent' "${HOME}/.config/akonadi/agent_config_akonadi_ewsmta_resource_${i}"
+
+        addconfigline 'akonadi_ewsmta_resource\InstanceCounter' "${count_resources_ews}" 'InstanceCounters' "${HOME}/.config/akonadi/agentsrc"
+        addconfigline "akonadi_ewsmta_resource_${i}\AgentType"  'akonadi_ewsmta_resource'   'Instances'     "${HOME}/.config/akonadi/agentsrc"
+
+        ## Mail transport ------------------------------------------------------
+
+        transport_id=$(date +%s)
+        sleep 1
+
+        addconfigline 'host'       "akonadi_ewsmta_resource_${i}" "Transport ${transport_id}" "${HOME}/.config/mailtransports"
+        addconfigline 'id'         "${transport_id}"              "Transport ${transport_id}" "${HOME}/.config/mailtransports"
+        addconfigline 'identifier' "akonadi_ewsmta_resource"      "Transport ${transport_id}" "${HOME}/.config/mailtransports"
+        addconfigline 'name'       "${LDAP_EMAIL}"                "Transport ${transport_id}" "${HOME}/.config/mailtransports"
+
+        addconfigline 'default-transport' "${transport_id}" "General" "${HOME}/.config/mailtransports"
+        
+        ## Profile -------------------------------------------------------------
+        
+        addconfigline 'EmailAddress' "${LDAP_EMAIL}"    'PROFILE_По умолчанию' "${HOME}/.config/emaildefaults"
+        addconfigline 'FullName'     "${LDAP_FULLNAME}" 'PROFILE_По умолчанию' "${HOME}/.config/emaildefaults"
+        
+        addconfigline 'Profile'      'По умолчанию'     'Defaults'             "${HOME}/.config/emaildefaults"
+        
+        ## Identity ------------------------------------------------------------
+        
+        identity_id=$(date +%s)
+        sleep 1
+        
+        addconfigline 'Default Domain'   "${LDAP_DOMAIN}"   'Identity #0' "${HOME}/.config/emailidentities"
+        addconfigline 'Email Address'    "${LDAP_EMAIL}"    'Identity #0' "${HOME}/.config/emailidentities"
+        addconfigline 'Identity'         "${LDAP_GDM_NAME}" 'Identity #0' "${HOME}/.config/emailidentities"
+        addconfigline 'Name'             "${LDAP_FULLNAME}" 'Identity #0' "${HOME}/.config/emailidentities"
+        addconfigline 'Transport'        "${transport_id}"  'Identity #0' "${HOME}/.config/emailidentities"
+        addconfigline 'uoid'             "${identity_id}"   'Identity #0' "${HOME}/.config/emailidentities"
+        
+        addconfigline 'Default Identity' "${identity_id}"   'General'     "${HOME}/.config/emailidentities"
+        
+        ## ---------------------------------------------------------------------
+        
+        restart_akonadi=1
+    fi
+    
+    if [[ $restart_akonadi -gt 0 ]]
+    then
+        akonadictl restart >/dev/null 2>/dev/null
+    fi
+fi
+
 #### Configure work report =====================================================
 
 if ispkginstalled work-report
