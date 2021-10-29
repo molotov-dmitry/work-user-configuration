@@ -258,7 +258,7 @@ then
     INDEX=$(( (RANDOM * RANDOM + RANDOM) % AVATAR_COLORS_COUNT ))
     bgcolor="#${AVATAR_COLORS[$INDEX]}"
     fgfont="Arial"
-    
+
     if [[ "gpqy" == *"${USER_NAME_LETTER}"* || "аруцд" == *"${USER_NAME_LETTER}"* ]]
     then
         dy=25
@@ -332,9 +332,9 @@ then
             user "${LDAP_LOGIN}"                                                \
             domain "${SVN_REALMSTRING}"
     fi
-        
+
     mkdir -p "${HOME}/.subversion/auth/svn.simple"
-    
+
     cat << _EOF > "${HOME}/.subversion/auth/svn.simple/$(echo -n "${SVN_REALMSTRING}" | md5sum | cut -d ' ' -f 1)"
 K 8
 passtype
@@ -354,7 +354,7 @@ V ${#LDAP_LOGIN}
 ${LDAP_LOGIN}
 END
 _EOF
-        
+
 fi
 
 #### Configure gitg ============================================================
@@ -387,7 +387,7 @@ fi
 if ispkginstalled epiphany-browser
 then
     #### GitLab ----------------------------------------------------------------
-    
+
     if [[ -z "$(secret-tool search xdg:schema org.epiphany.FormPassword username "${LDAP_LOGIN}" uri "https://${GITLAB_SERVER}" 2>/dev/null)" ]]
     then
         echo -n "${LDAP_PASSWORD}" | secret-tool store                              \
@@ -401,9 +401,9 @@ then
             uri "https://${GITLAB_SERVER}"                                          \
             form_username 'username'
     fi
-    
+
     #### Exchange --------------------------------------------------------------
-    
+
     if [[ -z "$(secret-tool search xdg:schema org.epiphany.FormPassword username "${LDAP_EMAIL}" uri "https://${EXCHANGE_SERVER}" 2>/dev/null)" ]]
     then
         echo -n "${LDAP_PASSWORD}" | secret-tool store                              \
@@ -417,9 +417,9 @@ then
             uri "https://${EXCHANGE_SERVER}"                                        \
             form_username 'username'
     fi
-    
+
     #### Redmine ---------------------------------------------------------------
-    
+
     if [[ -z "$(secret-tool search xdg:schema org.epiphany.FormPassword username "${LDAP_EMAIL}" uri "http://${REDMINE_SERVER}" 2>/dev/null)" ]]
     then
         echo -n "${LDAP_PASSWORD}" | secret-tool store                              \
@@ -444,22 +444,22 @@ then
     #### Kill pidgin processes -------------------------------------------------
 
     killall pidgin
-    
+
     #### Create Pidgin config directory ----------------------------------------
-    
+
     rm -rf "$HOME/.purple/icons"
-    
+
     mkdir -p "$HOME/.purple"
     mkdir -p "$HOME/.purple/icons"
-    
+
     #### Generate icon UUID and creation timestamp -----------------------------
-    
+
     xmppiconuuid="$(uuidgen | tr -d '-')"
     bonjouriconuuid="$(uuidgen | tr -d '-')"
     currentts="$(date +%s)"
-    
+
     #### Create account icons --------------------------------------------------
-    
+
     srcw=$(identify -format "%w" "$avatar_chat")
     srch=$(identify -format "%h" "$avatar_chat")
 
@@ -471,14 +471,14 @@ then
         then
             continue
         fi
-        
+
         convert -resize ${size}x${size} "$avatar_chat" "$dst"
-        
+
         if [[ "$(stat -c "%s" "$dst")" -lt 51200 ]]
         then
             break
         fi
-        
+
         rm -f "$dst"
     done
 
@@ -490,17 +490,17 @@ then
         then
             continue
         fi
-        
+
         convert -resize ${size}x${size} "$avatar_chat" "$dst"
-        
+
         if [[ "$(stat -c "%s" "$dst")" -lt 8192 ]]
         then
             break
         fi
-        
+
         rm -f "$dst"
     done
-    
+
     #### Overwrite Pidgin config file ------------------------------------------
 
     cat > "$HOME/.purple/accounts.xml" << _EOF
@@ -539,14 +539,14 @@ then
 _EOF
 
     #### Configure global buddy icon -------------------------------------------
-    
+
     if grep "<pref name='buddyicon' type='path' value='[^']*'/>"  "${HOME}/.purple/prefs.xml" >/dev/null 2>/dev/null
     then
         sed -i "s/<pref name='buddyicon' type='path' value='[^']*'\/>/<pref name='buddyicon' type='path' value='$(safestring "${avatar_chat}")'\/>/" "${HOME}/.purple/prefs.xml"
     fi
 
     #### Create autostart entry for pidgin -------------------------------------
-    
+
     if [[ ! -e "${HOME}/.config/autostart/pidgin.desktop" ]]
     then
         for dir in "${HOME}/.local/share/applications" "/usr/share/applications"
@@ -565,7 +565,7 @@ _EOF
 
 fi
 
-#### Configure kopete ==========================================================
+#### Configure Kopete ==========================================================
 
 if ispkginstalled kopete
 then
@@ -581,9 +581,9 @@ bonjour_status=$?
 if [[ $xmpp_status -ne 0 || $bonjour_status -ne 0 ]]
 then
     killall kopete
-    
+
     mkdir -p "$HOME/.config"
-    
+
     cat > "$HOME/.config/kopeterc" << _EOF
 [Account_BonjourProtocol_${LDAP_GDM_NAME}]
 AccountId=${LDAP_GDM_NAME}
@@ -655,12 +655,12 @@ _EOF
 
     mkdir -p "${HOME}/.local/share/kopete/avatars/User"
     cp -f "$avatar_chat" "${HOME}/.local/share/kopete/avatars/User/${kopete_identity}.png"
-    
+
     wallet_id="$(qdbus org.kde.kwalletd5 /modules/kwalletd5 org.kde.KWallet.open kdewallet 0 "Kopete")"
-    
+
     qdbus org.kde.kwalletd5 /modules/kwalletd5 createFolder     "${wallet_id}" "Kopete" "Kopete"
     qdbus org.kde.kwalletd5 /modules/kwalletd5 writePassword    "${wallet_id}" "Kopete" "Account_JabberProtocol_${XMPP_EMAIL}" "${LDAP_PASSWORD}" "Kopete"
-    
+
     nohup kopete >/dev/null 2>/dev/null &
 fi
 
@@ -820,7 +820,7 @@ then
     dconf write /org/gnome/shell/extensions/redmine-issues/redmine-url                  "'http://${REDMINE_EMAIL}:${LDAP_PASSWORD}@${REDMINE_SERVER}/redmine'"
     dconf write /org/gnome/shell/extensions/redmine-issues/show-status-item-assigned-to false
     dconf write /org/gnome/shell/extensions/redmine-issues/show-status-item-project     true
-    
+
     gsettingsadd org.gnome.shell enabled-extensions 'redmineIssues@UshakovVasilii_Github.yahoo.com'
 fi
 
