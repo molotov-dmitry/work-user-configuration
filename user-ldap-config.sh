@@ -20,12 +20,19 @@ function prefix_join_by
     echo "${*/#/dc=}"
 }
 
-function addconfigline()
+safestring()
 {
-    key="$1"
-    value="$2"
-    section="$3"
-    file="$4"
+    local inputstr="$1"
+
+    echo "${inputstr}" | sed 's/\\/\\\\/g;s/\//\\\//g'
+}
+
+addconfigline()
+{
+    local key="$1"
+    local value="$2"
+    local section="$3"
+    local file="$4"
 
     if ! grep -F "[${section}]" "$file" 1>/dev/null 2>/dev/null
     then
@@ -36,11 +43,14 @@ function addconfigline()
         echo "[${section}]" >> "$file"
     fi
 
-    sed -i "/^[[:space:]]*\[${section}\][[:space:]]*$/,/^[[:space:]]*\[.*/{/^[[:space:]]*$(echo "${key}" | sed 's/\//\\\//g')[[:space:]]*=/d}" "$file"
+    sed -i "/^[[:space:]]*\[${section}\][[:space:]]*$/,/^[[:space:]]*\[.*/{/^[[:space:]]*$(safestring "${key}")[[:space:]]*=/d}" "$file"
 
-    sed -i "/\[${section}\]/a $(echo "${key}=${value}" | sed 's/\//\\\//g')" "$file"
+    sed -i "/\[${section}\]/a $(safestring "${key}=${value}")" "$file"
 
-    [[ -n "$(tail -c1 "${file}")" ]] && echo >> "${file}"
+    if [[ -n "$(tail -c1 "${file}")" ]]
+    then
+        echo >> "${file}"
+    fi
 }
 
 function ispkginstalled()
@@ -90,11 +100,6 @@ function gsettingsadd()
     gsettings set $category $setting "${newvalue}"
 
     return $?
-}
-
-safestring()
-{
-    echo "$@" | sed 's/\//\\\//g'
 }
 
 #### Input credentials =========================================================
@@ -287,7 +292,10 @@ then
     sudo mkdir -p '/var/lib/AccountsService/icons/'
     sudo cp -f "$avatar_user" "/var/lib/AccountsService/icons/${USER}"
 
-    FUNC="$(declare -f addconfigline)"
+    FUNC="$(declare -f safestring)
+
+$(declare -f addconfigline)"
+
     sudo bash -c "$FUNC; addconfigline Icon \"/var/lib/AccountsService/icons/${USER}\" User \"/var/lib/AccountsService/users/${USER}\""
 fi
 
