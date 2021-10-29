@@ -210,7 +210,7 @@ AVATAR_COLORS_COUNT=${#AVATAR_COLORS[@]}
 
 #### Check LDAP login is correct ===============================================
 
-ldapoutput="$(ldapsearch -o ldif-wrap=no -x -u -LLL -h "$LDAP_FQDN" -D "$LDAP_EMAIL" -w "$LDAP_PASSWORD" -b "$LDAP_SEARCHBASE" "(mail=$LDAP_EMAIL)" "cn" "memberOf")"
+ldapoutput="$(ldapsearch -o ldif-wrap=no -x -u -LLL -H "ldap://$LDAP_FQDN" -D "$LDAP_EMAIL" -w "$LDAP_PASSWORD" -b "$LDAP_SEARCHBASE" "(mail=$LDAP_EMAIL)" "cn" "memberOf")"
 
 LDAP_FULLNAME="$(echo "$ldapoutput" | grep '^cn:: ' | cut -d ' ' -f 2 | base64 --decode)"
 
