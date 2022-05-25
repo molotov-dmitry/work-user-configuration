@@ -154,7 +154,7 @@ done
 
 while true
 do
-    ping -w 1 -c 1 rczifort.local > /dev/null && break
+    ping -w 1 -c 1 dc01.rczifort.local > /dev/null && break
     echo 'LDAP server unavailable'
 done
 
@@ -181,6 +181,8 @@ LDAP_FQDN=$(join_by '.' "${LDAP_DOMAIN[@]}")
 LDAP_EMAIL="${LDAP_LOGIN}@${LDAP_FQDN}"
 
 LDAP_SEARCHBASE=$(prefix_join_by ',' "${LDAP_DOMAIN[@]}")
+
+DOMAIN_SERVER="dc01.${LDAP_FQDN}"
 
 KERBEROS_FQDN="${LDAP_FQDN^^}"
 KERBEROS_EMAIL="${LDAP_LOGIN}@${KERBEROS_FQDN}"
@@ -210,7 +212,7 @@ AVATAR_COLORS_COUNT=${#AVATAR_COLORS[@]}
 
 #### Check LDAP login is correct ===============================================
 
-ldapoutput="$(ldapsearch -o ldif-wrap=no -x -u -LLL -H "ldap://$LDAP_FQDN" -D "$LDAP_EMAIL" -w "$LDAP_PASSWORD" -b "$LDAP_SEARCHBASE" "(mail=$LDAP_EMAIL)" "cn" "memberOf")"
+ldapoutput="$(ldapsearch -o ldif-wrap=no -x -u -LLL -H "ldap://$DOMAIN_SERVER" -D "$LDAP_EMAIL" -w "$LDAP_PASSWORD" -b "$LDAP_SEARCHBASE" "(mail=$LDAP_EMAIL)" "cn" "memberOf")"
 
 LDAP_FULLNAME="$(echo "$ldapoutput" | grep '^cn:: ' | cut -d ' ' -f 2 | base64 --decode)"
 
